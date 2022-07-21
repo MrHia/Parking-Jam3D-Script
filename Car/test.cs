@@ -28,7 +28,7 @@ public class test : MonoBehaviour, IPointerDownHandler, IDragHandler, IEndDragHa
     float objectSpeed = 10;
 
     int nextPosIndex;
-    [SerializeField]  Transform nextPos;
+    [SerializeField] Transform nextPos;
 
 
     public bool isDestroy = false;
@@ -224,10 +224,8 @@ public class test : MonoBehaviour, IPointerDownHandler, IDragHandler, IEndDragHa
         }
         if (isDestroy)
         {
-            Debug.Log("ismove");
+            //Debug.Log("ismove");
 
-            //transform.DORotate(new Vector3(0f, -90f, 0f), 0.5f);
-            //isMoving = true;
 
             drirection_vector = Vector3.zero;
             gameObject.tag = "Finish";
