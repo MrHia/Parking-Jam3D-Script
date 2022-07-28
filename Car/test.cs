@@ -8,50 +8,47 @@ public class test : MonoBehaviour, IPointerDownHandler, IDragHandler, IEndDragHa
 {
 
     public float PositionxBegin;
+
     public float PositionyBegin;
 
     public float PositionxEnd;
 
     public float PositionyEnd;
 
-    public Rigidbody m_Rigidbody;
-    public Rigidbody c_Rigidbody;
 
-    BoxCollider m_Collider;
+    public Rigidbody m_Rigidbody;
+
+
+    public Rigidbody c_Rigidbody;
 
     public float speed = 10;
 
     public string direction = "";
+
+
     public Vector3 drirection_vector;
 
     [SerializeField] Transform[] Positions;
+    [SerializeField] Transform nextPos;
+
     float objectSpeed = 10;
 
     int nextPosIndex;
-    [SerializeField] Transform nextPos;
-
 
     public bool isDestroy = false;
 
     bool isMoving = false;
 
     bool isMoveTowards = true;
-    bool Rotation;
 
-
+    //public bool checkOnTriggerEnter = false;
     void Start()
     {
         m_Rigidbody = this.GetComponent<Rigidbody>();
-        m_Collider = this.GetComponent<BoxCollider>();
-
-        //Positions.Add(new Vector3(-6f, 0.5f, 6f));
-        //Positions.Add(new Vector3(6f, 0.5f, 6f));
-        //Positions.Add(new Vector3(6f, 0.5f, -6f));
-        //Positions.Add(new Vector3(-6f, 0.5f, -6f));
-        //Positions.Add(new Vector3(-6f, 0.5f, 10f));
     }
 
     //Called by the EventSystem every time the pointer is moved during dragging.
+
     public void OnDrag(PointerEventData eventData)
     {
         if (eventData.pointerDrag.tag == "CarHorizontal-left" || eventData.pointerDrag.tag == "CarHorizontal-right" || eventData.pointerDrag.tag == "CarVertical-top" || eventData.pointerDrag.tag == "CarVertical-bottom")
@@ -134,52 +131,61 @@ public class test : MonoBehaviour, IPointerDownHandler, IDragHandler, IEndDragHa
                     transform.position = transform.position + Vector3.forward * speed * Time.deltaTime;
                 }
             }
+
             drirection_vector = Vector3.zero;
             isMoving = false;
+            if (this.tag == "Finish" && collision.gameObject.tag == "Finish")
+            {
+                float distThis = Vector3.Distance(nextPos.position, transform.position);
+                float distCollision = Vector3.Distance(nextPos.position, collision.transform.position);
+                if (distCollision < distThis)
+                {
+                    StartCoroutine(EnterobjectSpeed());
+                }
+            }
+
         }
     }
 
-
+    public bool checkOnTriggerStay = false;
+    private void OnTriggerStay(Collider other)
+    {
+        checkOnTriggerStay = true;
+    }
+    public bool checkOnCollisionStay = false;
     void OnCollisionExit(Collision collision)
     {
-        if (collision.gameObject.tag == "CarHorizontal-left" || collision.gameObject.tag == "CarHorizontal-right" || collision.gameObject.tag == "CarVertical-top" || collision.gameObject.tag == "CarVertical-bottom" || collision.gameObject.tag == "wall" || collision.gameObject.tag == "Finish")
-        {
-            drirection_vector = Vector3.zero;
+       if (collision.gameObject.tag == "CarHorizontal-left" || collision.gameObject.tag == "CarHorizontal-right" || collision.gameObject.tag == "CarVertical-top" || collision.gameObject.tag == "CarVertical-bottom" || collision.gameObject.tag == "wall" || collision.gameObject.tag == "Finish")
+       {
+          drirection_vector = Vector3.zero;
 
-        }
+       }
+       checkOnCollisionStay = false;     
     }
-    //private void OnTriggerEnter(Collider other)
-    //{
-    //    if (other.tag == "Pointway")
-    //    {
-    //        transform.DORotate(new Vector3(0f, 90f, 0f), (float)0.5);
-    //        Debug.Log(other.tag);
-    //    }
-    //}
+
+        
+
+    IEnumerator EnterobjectSpeed()
+    {
+        objectSpeed = 0f;
+        yield return new WaitForSeconds(0.5f);
+        objectSpeed = 10;
+    }
 
     public void SetNextPosIndex(int SetNextPosIndex)
     {
         nextPosIndex = SetNextPosIndex;
         nextPos = Positions[SetNextPosIndex];
-        //PosCollision = c_PosCollision;
-        //NextPosIndex = Positions.IndexOf(PosCollision.position);
-
-        //NextPos = Positions[++NextPosIndex];
-        //Debug.Log(c_PosCollision.position,c_PosCollision.gameObject);
-        //Debug.Log(NextPosIndex);
-        //Debug.Break();
-
-
     }
+
+
     public void SetisDestroyCar(bool isDestroyCar)
     {
         isDestroy = isDestroyCar;
     }
 
-    //public Transform GetPosCollision()
-    //{
-    //    return PosCollision;
-    //}
+
+
     public void SetIsMoving(bool isMoving_)
     {
         isMoving = isMoving_;
@@ -189,6 +195,7 @@ public class test : MonoBehaviour, IPointerDownHandler, IDragHandler, IEndDragHa
     {
         drirection_vector = SetDrirection;
     }
+
     void MoveGameObject()
     {
         if (transform.position == nextPos.position)
@@ -213,10 +220,8 @@ public class test : MonoBehaviour, IPointerDownHandler, IDragHandler, IEndDragHa
         }
     }
 
-    // Update is called once per frame
     void Update()
     {
-
         if (isMoving)
         {
 
@@ -224,15 +229,9 @@ public class test : MonoBehaviour, IPointerDownHandler, IDragHandler, IEndDragHa
         }
         if (isDestroy)
         {
-            //Debug.Log("ismove");
-
-
             drirection_vector = Vector3.zero;
             gameObject.tag = "Finish";
             MoveGameObject();
-
         }
-
-
     }
 }
