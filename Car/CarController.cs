@@ -248,7 +248,7 @@ public class CarController : MonoBehaviour, IPointerDownHandler, IDragHandler, I
 
 
 
-    //public bool checkOnCollisionStay = false;
+
     void OnCollisionExit(Collision collision)
     {
         if (collision.gameObject.tag == "CarHorizontal-left" || collision.gameObject.tag == "CarHorizontal-right" || collision.gameObject.tag == "CarVertical-top" || collision.gameObject.tag == "CarVertical-bottom" || collision.gameObject.tag == "wall" || collision.gameObject.tag == "Finish")
@@ -269,7 +269,7 @@ public class CarController : MonoBehaviour, IPointerDownHandler, IDragHandler, I
                     }
                 }
             }
-            //c_CarCtrl.SetIsMoveTowards(true);
+
         }
 
     }
@@ -279,10 +279,10 @@ public class CarController : MonoBehaviour, IPointerDownHandler, IDragHandler, I
     IEnumerator EnterobjectSpeed()
     {
         isMoveTowards = false;
-        //Debug.Log("==0");
+
         yield return new WaitForSeconds(0.1f);
         isMoveTowards = true;
-        //Debug.Log("==10");
+
     }
 
     
@@ -307,9 +307,6 @@ public class CarController : MonoBehaviour, IPointerDownHandler, IDragHandler, I
             
             transform.DORotate(new Vector3(0f, transform.rotation.eulerAngles.y + 90f, 0f), 0.1f).OnComplete(() => { isMoveTowards = true;});
 
-            //other.transform.DOMove(new Vector3(this.transform.position.x, this.transform.position.y, other.transform.position.z), 0.5f);
-            //other.transform.DORotate(new Vector3(0f, transform.rotation.eulerAngles.y + 90f, 0f), 0.5f);
-
 
         }
         else
@@ -328,7 +325,6 @@ public class CarController : MonoBehaviour, IPointerDownHandler, IDragHandler, I
         {
 
             transform.Translate(drirection_vector * speed * Time.fixedDeltaTime);
-            //transform.DOMove(transform.position + drirection_vector,2f,isMoving);
         }
         if (isDestroy)
         {   

@@ -40,11 +40,4 @@ public class UIManager : MonoBehaviour
         }
     }
 
-
-    //public void ShowWinGame(bool isShow)
-    //{
-    //    if (WinGamePanel)
-    //        WinGamePanel.SetActive(isShow);
-    //}
-  
 }

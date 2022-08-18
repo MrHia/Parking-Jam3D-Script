@@ -34,6 +34,7 @@ public class GameController : MonoBehaviour
         Instantiate(Resources.Load<GameObject>("Level/Level-" + m_db.GetLevel()));
 
         m_ui.SetLevelText("Level: "+ m_db.GetLevel());
+        m_ui.SetCointWinText("" + m_db.GetCoint());
         CountCarInGame();
 
 
@@ -77,8 +78,6 @@ public class GameController : MonoBehaviour
         CheckWinGame();
 
         m_ui.SetCointPauseText(""+m_db.GetCoint());
-
-
         
     }
 
@@ -92,8 +91,6 @@ public class GameController : MonoBehaviour
         Instantiate(Resources.Load<GameObject>("Level/Level-"+m_db.GetLevel()));
         m_Coint = 0;
         CountCarInGame();
-        //Scene scene = SceneManager.GetActiveScene();
-        //SceneManager.LoadScene(scene.name);
     }
 
     public void PauseGame()
@@ -126,48 +123,19 @@ public class GameController : MonoBehaviour
 
         MainMenu.DOAnchorPos(new Vector2(0, 0), 0.25f);
         WingameMenu.DOAnchorPos(new Vector2(-1300, 0), 0.25f);
-        m_db.SaveCoint(m_Coint);
+        m_db.SetCoint(m_Coint);
 
         m_db.SetLevel();
         Destroy(GameObject.FindWithTag("Map"));
-        //Debug.LogError(Resources.Load<GameObject>("Level/Level-" + m_db.GetLevel())!=null);
-        //Debug.LogError(m_db.GetLevel());
         Instantiate(Resources.Load<GameObject>("Level/Level-" + m_db.GetLevel()));
-        
-
-
         m_ui.SetLevelText("Level: " + m_db.GetLevel());
         m_ui.SetCointPauseText(""+m_db.GetCoint());
         m_ui.SetCointWinText("" + m_db.GetCoint());
         IsWingame = true;
         m_Coint = 0;
         CountCarInGame();
-        //LoadformJson();
-        //gameObject.tag == "Map"
-        //Scene scene = SceneManager.GetActiveScene();
-        //int nextSceneIndex = SceneManager.GetActiveScene().buildIndex + 1;
-        //if (SceneManager.sceneCountInBuildSettings > nextSceneIndex)
-        //{
-        //    SceneManager.LoadScene(nextSceneIndex);
-        //}
-        //SceneManager.LoadScene("Level-2");
-        //LevelData data = new LevelData { CurrentSceneName = "abc", NextSceneName = "def" };
-        //Debug.Log(nextSceneIndex);
-        //Debug.Log(SceneManager.sceneCount);
-        //SceneManager.LoadScene(data.NextSceneName);
-    }
+        m_db.SaveData();
 
-    public class LevelData {
-        public string CurrentSceneName { get; set; }
-        public string NextSceneName { get; set; }
-        //prop
-
-        //ctor
-
-        //public string MyProperty { get; set; }
-        //public LevelData()
-        //{ 
-        //}
     }
 
    
