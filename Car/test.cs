@@ -37,18 +37,76 @@ public class test : MonoBehaviour, IPointerDownHandler, IDragHandler, IEndDragHa
 
     public bool isDestroy = false;
 
-    bool isMoving = false;
+    public bool isMoving = false;
 
-    bool isMoveTowards = true;
+    public bool isMoveTowards = true;
+
+    GameController m_GameCtrl;
+
+    CarController c_CarCtrl;
+
+
+    GameObject gameObject1;
 
     //public bool checkOnTriggerEnter = false;
     void Start()
     {
+
+
         m_Rigidbody = this.GetComponent<Rigidbody>();
+        m_GameCtrl = FindObjectOfType<GameController>();
     }
 
-    //Called by the EventSystem every time the pointer is moved during dragging.
+    public Transform GetNextPos()
+    {
+        return nextPos;
+    }
+    public void SetNextPosIndex(int SetNextPosIndex)
+    {
+        nextPosIndex = SetNextPosIndex;
+        nextPos = Positions[SetNextPosIndex];
+    }
 
+    public bool GetisMoveTowards()
+    {
+        return isMoveTowards;
+    }
+
+    public Vector3 GetDrirection_vector()
+    {
+        return drirection_vector;
+    }
+
+    public void SetisDestroyCar(bool isDestroyCar)
+    {
+        isDestroy = isDestroyCar;
+
+    }
+
+
+
+    public void SetIsMoving(bool isMoving_)
+    {
+        isMoving = isMoving_;
+    }
+
+    public void SetIsMoveTowards(bool isMoveTowards_)
+    {
+        isMoveTowards = isMoveTowards_;
+    }
+
+
+
+    public void SetDrirection_vector(Vector3 SetDrirection)
+    {
+        drirection_vector = SetDrirection;
+    }
+
+
+
+
+    //Called by the EventSystem every time the pointer is moved during dragging.
+    //while dragging the mouse to get the coordinates of x,y
     public void OnDrag(PointerEventData eventData)
     {
         if (eventData.pointerDrag.tag == "CarHorizontal-left" || eventData.pointerDrag.tag == "CarHorizontal-right" || eventData.pointerDrag.tag == "CarVertical-top" || eventData.pointerDrag.tag == "CarVertical-bottom")
@@ -60,8 +118,11 @@ public class test : MonoBehaviour, IPointerDownHandler, IDragHandler, IEndDragHa
         }
 
     }
+    //At the end, drag the mouse to compare the beginning and end positions of x, y, giving the direction for each type of vehicle
     public void OnEndDrag(PointerEventData eventData)
     {
+
+
         if (eventData.pointerDrag.tag == "CarHorizontal-left" || eventData.pointerDrag.tag == "CarHorizontal-right")
         {
 
@@ -92,10 +153,12 @@ public class test : MonoBehaviour, IPointerDownHandler, IDragHandler, IEndDragHa
         }
         if (drirection_vector != Vector3.zero)
         {
+
             isMoving = true;
         }
     }
 
+    //When the mouse is pressed down get the original coordinates of x,y
     public void OnPointerDown(PointerEventData eventData)
     {
 
@@ -111,90 +174,118 @@ public class test : MonoBehaviour, IPointerDownHandler, IDragHandler, IEndDragHa
         {
 
 
-            if (drirection_vector.sqrMagnitude != 0)
+            if (drirection_vector != Vector3.zero)
             {
 
                 if (drirection_vector == Vector3.left)
                 {
-                    transform.position = transform.position + Vector3.right * speed * Time.deltaTime;
+                    transform.position = transform.position + Vector3.right * speed * Time.fixedDeltaTime;
                 }
                 if (drirection_vector == Vector3.right)
                 {
-                    transform.position = transform.position + Vector3.left * speed * Time.deltaTime;
+                    transform.position = transform.position + Vector3.left * speed * Time.fixedDeltaTime;
                 }
                 if (drirection_vector == Vector3.forward)
                 {
-                    transform.position = transform.position + Vector3.back * speed * Time.deltaTime;
+                    transform.position = transform.position + Vector3.back * speed * Time.fixedDeltaTime;
                 }
                 if (drirection_vector == Vector3.back)
                 {
-                    transform.position = transform.position + Vector3.forward * speed * Time.deltaTime;
+                    transform.position = transform.position + Vector3.forward * speed * Time.fixedDeltaTime;
                 }
             }
 
             drirection_vector = Vector3.zero;
+
             isMoving = false;
+
             if (this.tag == "Finish" && collision.gameObject.tag == "Finish")
             {
-                float distThis = Vector3.Distance(nextPos.position, transform.position);
-                float distCollision = Vector3.Distance(nextPos.position, collision.transform.position);
-                if (distCollision < distThis)
+
+                gameObject1 = collision.gameObject;
+                c_CarCtrl = gameObject1.GetComponent<CarController>();
+                if (Vector3.Distance(this.nextPos.position, c_CarCtrl.GetNextPos().position) == 0)
                 {
-                    StartCoroutine(EnterobjectSpeed());
+                    float distThis = Vector3.Distance(nextPos.position, transform.position);
+                    float distCollision = Vector3.Distance(nextPos.position, c_CarCtrl.GetNextPos().position);
+
+                    if (distCollision < distThis)
+                    {
+                        isMoveTowards = false;
+                        c_CarCtrl.SetIsMoveTowards(true);
+                    }
+
+                }
+
+            }
+
+        }
+    }
+
+
+    void OnCollisionStay(Collision collisionInfo)
+    {
+        if (collisionInfo.gameObject.tag == "CarHorizontal-left" || collisionInfo.gameObject.tag == "CarHorizontal-right" || collisionInfo.gameObject.tag == "CarVertical-top" || collisionInfo.gameObject.tag == "CarVertical-bottom" || collisionInfo.gameObject.tag == "wall" || collisionInfo.gameObject.tag == "Finish")
+        {
+            if (collisionInfo.gameObject.tag == "Finish" && this.tag == "Finish")
+            {
+                gameObject1 = collisionInfo.gameObject;
+                c_CarCtrl = gameObject1.GetComponent<CarController>();
+                if (this.nextPos.position == c_CarCtrl.GetNextPos().position)
+                {
+                    float distThis = Vector3.Distance(nextPos.position, transform.position);
+                    float distCollision = Vector3.Distance(nextPos.position, c_CarCtrl.GetNextPos().position);
+                    if (distCollision < distThis)
+                    {
+                        StartCoroutine(EnterobjectSpeed());
+                        c_CarCtrl.SetIsMoveTowards(true);
+                    }
                 }
             }
 
         }
     }
 
-    public bool checkOnTriggerStay = false;
-    private void OnTriggerStay(Collider other)
-    {
-        checkOnTriggerStay = true;
-    }
-    public bool checkOnCollisionStay = false;
+
+
+    //public bool checkOnCollisionStay = false;
     void OnCollisionExit(Collision collision)
     {
-       if (collision.gameObject.tag == "CarHorizontal-left" || collision.gameObject.tag == "CarHorizontal-right" || collision.gameObject.tag == "CarVertical-top" || collision.gameObject.tag == "CarVertical-bottom" || collision.gameObject.tag == "wall" || collision.gameObject.tag == "Finish")
-       {
-          drirection_vector = Vector3.zero;
+        if (collision.gameObject.tag == "CarHorizontal-left" || collision.gameObject.tag == "CarHorizontal-right" || collision.gameObject.tag == "CarVertical-top" || collision.gameObject.tag == "CarVertical-bottom" || collision.gameObject.tag == "wall" || collision.gameObject.tag == "Finish")
+        {
+            if (collision.gameObject.tag == "Finish" && this.tag == "Finish")
+            {
+                gameObject1 = collision.gameObject;
+                c_CarCtrl = gameObject1.GetComponent<CarController>();
+                if (this.nextPos.position == c_CarCtrl.GetNextPos().position)
+                {
 
-       }
-       checkOnCollisionStay = false;     
+                    float distThis = Vector3.Distance(nextPos.position, transform.position);
+                    float distCollision = Vector3.Distance(nextPos.position, c_CarCtrl.GetNextPos().position);
+                    if (distCollision < distThis)
+                    {
+                        StartCoroutine(EnterobjectSpeed());
+                        c_CarCtrl.SetIsMoveTowards(true);
+                    }
+                }
+            }
+            //c_CarCtrl.SetIsMoveTowards(true);
+        }
+
     }
 
-        
+
 
     IEnumerator EnterobjectSpeed()
     {
-        objectSpeed = 0f;
-        yield return new WaitForSeconds(0.5f);
-        objectSpeed = 10;
-    }
-
-    public void SetNextPosIndex(int SetNextPosIndex)
-    {
-        nextPosIndex = SetNextPosIndex;
-        nextPos = Positions[SetNextPosIndex];
+        isMoveTowards = false;
+        //Debug.Log("==0");
+        yield return new WaitForSeconds(0.1f);
+        isMoveTowards = true;
+        //Debug.Log("==10");
     }
 
 
-    public void SetisDestroyCar(bool isDestroyCar)
-    {
-        isDestroy = isDestroyCar;
-    }
-
-
-
-    public void SetIsMoving(bool isMoving_)
-    {
-        isMoving = isMoving_;
-    }
-
-    public void SetDrirection_vector(Vector3 SetDrirection)
-    {
-        drirection_vector = SetDrirection;
-    }
 
     void MoveGameObject()
     {
@@ -207,25 +298,37 @@ public class test : MonoBehaviour, IPointerDownHandler, IDragHandler, IEndDragHa
             if (nextPosIndex >= Positions.Length)
             {
                 Destroy(gameObject);
+                m_GameCtrl.ReduceCar();
             }
-            nextPos = Positions[nextPosIndex];
-            transform.DORotate(new Vector3(0f, transform.rotation.eulerAngles.y + 90f, 0f), 0.5f).OnComplete(() => { isMoveTowards = true; });
+            else
+            {
+                nextPos = Positions[nextPosIndex];
+            }
+
+            transform.DORotate(new Vector3(0f, transform.rotation.eulerAngles.y + 90f, 0f), 0.1f).OnComplete(() => { isMoveTowards = true; });
+
+            //other.transform.DOMove(new Vector3(this.transform.position.x, this.transform.position.y, other.transform.position.z), 0.5f);
+            //other.transform.DORotate(new Vector3(0f, transform.rotation.eulerAngles.y + 90f, 0f), 0.5f);
+
+
         }
         else
         {
             if (isMoveTowards)
             {
-                transform.position = Vector3.MoveTowards(transform.position, nextPos.position, objectSpeed * Time.deltaTime);
+                transform.position = Vector3.MoveTowards(transform.position, nextPos.position, objectSpeed * Time.fixedDeltaTime);
             }
         }
     }
 
-    void Update()
+
+    void FixedUpdate()
     {
         if (isMoving)
         {
 
-            transform.Translate(drirection_vector * speed * Time.deltaTime);
+            //transform.Translate(drirection_vector * speed * Time.fixedDeltaTime);
+            //transform.DOMove(drirection_vector,0.02,isMoving);
         }
         if (isDestroy)
         {
