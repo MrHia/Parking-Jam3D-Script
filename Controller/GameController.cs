@@ -17,6 +17,7 @@ public class GameController : MonoBehaviour
     UIManager m_ui;
 
     Data m_db;
+    public AudioSource m_MoveAudio;
 
     public string statusGame = "";
     public void incrementCoint()
@@ -39,6 +40,15 @@ public class GameController : MonoBehaviour
 
 
     }
+    public int CountCarFinish()
+    {
+
+
+        return GameObject.FindGameObjectsWithTag("Finish").Length;
+    }
+
+
+
     void CountCarInGame()
     {
         CarInGame = 1;
@@ -67,18 +77,46 @@ public class GameController : MonoBehaviour
         {
             MainMenu.DOAnchorPos(new Vector2(0, 2000), 0.25f);
             WingameMenu.DOAnchorPos(new Vector2(0, 0), 0.25f);
-
+            m_ui.SetCointWinText("" + (m_db.GetCoint() + m_Coint));
             IsWingame = false;
         }
     }
-
+    float x = 25f;
     private void Update()
     {
         CountCarInGame();
         CheckWinGame();
-
+        CountCarFinish();
         m_ui.SetCointPauseText(""+m_db.GetCoint());
         
+        if (!isPausedMoveAudio)
+        {
+            if (CountCarFinish() == 0 && m_MoveAudio.isPlaying)
+            {
+                m_MoveAudio.Stop();
+            }
+            if (CountCarFinish() > 0 && !m_MoveAudio.isPlaying)
+            {
+                m_MoveAudio.Play();
+            }
+        }
+        if(CarInGame ==0 && CountCarFinish() > 0)
+        {
+            x -= Time.fixedDeltaTime;
+            if (x <= 0 )
+            {
+                GameObject[] FinishCar = GameObject.FindGameObjectsWithTag("Finish");
+                for(int i=0;  i<FinishCar.Length; i++)
+                {
+                    CarController CarfinishCtrl = FinishCar[i].GetComponent<CarController>();
+                    CarfinishCtrl.isMoveTowards = true;
+                    //Debug.LogError("hi");
+                    
+                }
+                //GameObject.FindGameObjectsWithTag("Finish").[]
+            }
+        }
+
     }
 
 
@@ -91,17 +129,31 @@ public class GameController : MonoBehaviour
         Instantiate(Resources.Load<GameObject>("Level/Level-"+m_db.GetLevel()));
         m_Coint = 0;
         CountCarInGame();
+        m_ui.SetLevelText("Level: " + m_db.GetLevel());
     }
-
+    public bool isPausedMoveAudio = false;
+    //bool isPausedDrifAudio = false;
     public void PauseGame()
     {
         Time.timeScale = 0;
 
+        if (m_MoveAudio.isPlaying)
+        {
+            m_MoveAudio.Pause();
+            isPausedMoveAudio = true;
+        }
+        //if(CarController)
 
     }
     public void ResumeGame()
     {
         Time.timeScale = 1;
+        if (isPausedMoveAudio)
+        {
+            m_MoveAudio.Play();
+            isPausedMoveAudio = false;
+        }
+
     }
 
     public void PauseButton()

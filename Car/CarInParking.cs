@@ -6,8 +6,9 @@ using UnityEngine;
 public class CarInParking : MonoBehaviour
 {
     CarController Car;
-    Collider Collider; 
-
+    Collider Collider;
+    public AudioSource m_AudioBox;
+    Vector3 direct_vector  ;
     private void Awake()
     {
         Car = this.GetComponentInParent<CarController>();
@@ -23,13 +24,22 @@ public class CarInParking : MonoBehaviour
     {
         if (other.tag == "Box")
         {
+
+
             CarInParking carCollided = other.GetComponent<CarInParking>();
             if (carCollided.Car.tag == "Finish" && Car.gameObject.tag != "Finish")
             {
-
-                Car.SetDrirection_vector(Vector3.zero);
-                Car.SetIsMoving(false);
-                Car.SetIsMoveTowards(false);
+                //direct_vector = Car.GetDrirection_vector();
+                
+                if (Car.GetDrirection_vector() != Vector3.zero)
+                {
+                    direct_vector = Car.GetDrirection_vector();
+                    m_AudioBox.Play();
+                    Car.SetDrirection_vector(Vector3.zero);
+                    Car.SetIsMoving(false);
+                    Car.SetIsMoveTowards(false);
+                }
+                
             }
         }
 
@@ -42,18 +52,33 @@ public class CarInParking : MonoBehaviour
             CarInParking carCollided = other.GetComponent<CarInParking>();
             if (carCollided.Car.tag == "Finish" && Car.gameObject.tag != "Finish")
             {
-
-                Car.SetDrirection_vector(Vector3.zero);
-                Car.SetIsMoving(false);
-                Car.SetIsMoveTowards(false);
+                if(Car.GetDrirection_vector() != Vector3.zero)
+                {
+                    Car.SetDrirection_vector(Vector3.zero);
+                    Car.SetIsMoving(false);
+                    Car.SetIsMoveTowards(false);
+                }
             }
         }
     }
 
     void OnTriggerExit(Collider other)
     {
+       
+        
+        if (other.tag == "Box")
+        {
+            CarInParking carCollided = other.GetComponent<CarInParking>();
+            if (carCollided.Car.tag == "Finish" && Car.gameObject.tag != "Finish")
+            {
+                //Debug.Log(direct_vector + " Vs " +Car.gameObject.tag);
+                Car.SetDrirection_vector(direct_vector);
+                Car.SetIsMoving(true);
+                Car.SetIsMoveTowards(true);
 
-        Car.SetIsMoveTowards(true);
+                Car.SetisDrag(true);
+            }
+        }
     }
 
 }

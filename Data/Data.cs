@@ -115,7 +115,7 @@ public class Data : MonoBehaviour
         {
             PlayerPrefs.DeleteAll();
             PlayerPrefs.SetInt("Level",1);
-            PlayerPrefs.SetInt("Max Level", 2);
+            PlayerPrefs.SetInt("Max Level", 4);
             PlayerPrefs.SetInt("Coint", 0);
             PlayerPrefs.Save();
         }
@@ -135,6 +135,9 @@ public class Data : MonoBehaviour
         if (CointData.Level < CointData.MaxLevel)
         {
             CointData.Level++;
+        }else if(CointData.Level == CointData.MaxLevel)
+        {
+            CointData.Level = 1;
         }
 
     }
@@ -168,6 +171,7 @@ public class Data : MonoBehaviour
         else if (Input.GetKeyUp(KeyCode.Alpha3))
         {
             PlayerPrefs.DeleteAll();
+            LoadData();
         }
 
 

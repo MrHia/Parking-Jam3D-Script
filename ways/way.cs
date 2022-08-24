@@ -31,6 +31,9 @@ public class way : MonoBehaviour
     {
         if (other.CompareTag("CarHorizontal-left") || other.CompareTag("CarHorizontal-right") || other.CompareTag("CarVertical-top") || other.CompareTag("CarVertical-bottom"))
         {
+
+
+
             if (this.CompareTag("Way1") && other.CompareTag("CarVertical-top"))
             {
                 other.transform.DOMove(new Vector3(other.transform.position.x, this.transform.position.y, this.transform.position.z), 0.1f);
@@ -86,7 +89,11 @@ public class way : MonoBehaviour
             m_GC.incrementCoint();
 
             other.transform.GetComponent<CarController>().SetisDestroyCar(true);
+            other.transform.GetComponent<CarController>().m_DrifAudio.Play();
+            //transform.GetComponent<GameController>().m_MoveAudio.loop = true;
+            m_GC.m_MoveAudio.Play();
+            
         }
     }
-
+    
 }

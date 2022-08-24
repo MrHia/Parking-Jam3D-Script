@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
+
+
 public class CarController : MonoBehaviour, IPointerDownHandler, IDragHandler, IEndDragHandler
 {
 
@@ -45,8 +47,19 @@ public class CarController : MonoBehaviour, IPointerDownHandler, IDragHandler, I
 
     CarController c_CarCtrl;
 
-
+    bool isDrag = true;
+    
     GameObject gameObject1;
+
+    //public AudioSource m_MoveAudio;
+    public AudioSource m_DrifAudio;
+    public AudioSource m_CollisionAudio;
+
+
+    public void SetisDrag (bool SetisDrag){
+
+        isDrag = SetisDrag;
+    }
 
     //public bool checkOnTriggerEnter = false;
     void Start()
@@ -122,40 +135,44 @@ public class CarController : MonoBehaviour, IPointerDownHandler, IDragHandler, I
     public void OnEndDrag(PointerEventData eventData)
     {
 
-
-        if (eventData.pointerDrag.tag == "CarHorizontal-left" || eventData.pointerDrag.tag == "CarHorizontal-right")
+        if (isDrag)
         {
-
-            if (PositionxBegin > PositionxEnd)
+            if (eventData.pointerDrag.tag == "CarHorizontal-left" || eventData.pointerDrag.tag == "CarHorizontal-right")
             {
 
-                drirection_vector = Vector3.left;
+                if (PositionxBegin > PositionxEnd)
+                {
+
+                    drirection_vector = Vector3.left;
+                }
+                else if (PositionxBegin < PositionxEnd)
+                {
+
+                    drirection_vector = Vector3.right;
+                }
             }
-            else if (PositionxBegin < PositionxEnd)
+            if (eventData.pointerDrag.tag == "CarVertical-top" || eventData.pointerDrag.tag == "CarVertical-bottom")
             {
 
-                drirection_vector = Vector3.right;
+                if (PositionyEnd > PositionyBegin)
+                {
+                    drirection_vector = Vector3.forward;
+
+                }
+                else if (PositionyEnd < PositionyBegin)
+                {
+                    drirection_vector = Vector3.back;
+                }
+
             }
+            if (drirection_vector != Vector3.zero)
+            {
+
+                isMoving = true;
+            }
+            isDrag = false;
         }
-        if (eventData.pointerDrag.tag == "CarVertical-top" || eventData.pointerDrag.tag == "CarVertical-bottom")
-        {
-
-            if (PositionyEnd > PositionyBegin)
-            {
-                drirection_vector = Vector3.forward;
-
-            }
-            else if (PositionyEnd < PositionyBegin)
-            {
-                drirection_vector = Vector3.back;
-            }
-
-        }
-        if (drirection_vector != Vector3.zero)
-        {
-            
-            isMoving = true;
-        }
+        
     }
 
     //When the mouse is pressed down get the original coordinates of x,y
@@ -169,9 +186,18 @@ public class CarController : MonoBehaviour, IPointerDownHandler, IDragHandler, I
 
     void OnCollisionEnter(Collision collision)
     {
+        
+        
 
         if (collision.gameObject.tag == "CarHorizontal-left" || collision.gameObject.tag == "CarHorizontal-right" || collision.gameObject.tag == "CarVertical-top" || collision.gameObject.tag == "CarVertical-bottom" || collision.gameObject.tag == "wall" || collision.gameObject.tag == "Finish")
         {
+            if (m_CollisionAudio && collision.gameObject.tag != "Finish")
+            {
+                m_CollisionAudio.Play();
+                //Debug.LogError("Collision: " + collision.gameObject.tag + " Vs "+ this.gameObject.tag);
+
+            }
+            isDrag = true;
 
 
             if (drirection_vector != Vector3.zero)
@@ -299,6 +325,7 @@ public class CarController : MonoBehaviour, IPointerDownHandler, IDragHandler, I
             {
                 Destroy(gameObject);
                 m_GameCtrl.ReduceCar();
+                
             }
             else
             {
@@ -317,8 +344,7 @@ public class CarController : MonoBehaviour, IPointerDownHandler, IDragHandler, I
             }
         }
     }
-
-
+   
     void FixedUpdate()
     {
         if (isMoving)
@@ -327,10 +353,13 @@ public class CarController : MonoBehaviour, IPointerDownHandler, IDragHandler, I
             transform.Translate(drirection_vector * speed * Time.fixedDeltaTime);
         }
         if (isDestroy)
-        {   
+        {
+
             drirection_vector = Vector3.zero;
             gameObject.tag = "Finish";
             MoveGameObject();
         }
+
+
     }
 }
